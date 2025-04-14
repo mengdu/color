@@ -207,6 +207,7 @@ func (c ColorFn) StrikeThrough() ColorFn {
 	return c.color("9", "29")
 }
 
+// See: https://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
 func (c ColorFn) Other(start string, end string) ColorFn {
 	return c.color(start, end)
 }

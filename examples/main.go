@@ -30,7 +30,7 @@ func main() {
 		c.Reverse().String("Reverse"),
 		c.StrikeThrough().String("StrikeThrough"),
 	)
-	fmt.Println(c.StrikeThrough().Underline().Bold().Italic().Red().String("StrikeThrough Underline Bold Italic Green"))
+	fmt.Println(c.StrikeThrough().Underline().Bold().Italic().Red().String("StrikeThrough Underline Bold Italic Red"))
 	fmt.Println(c.Other("38;2;117;45;245", "0").String("Other color"))
 	fmt.Println(c.Other("48;2;117;45;245", "0").String("Other color"))
 }
