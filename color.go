@@ -3,6 +3,7 @@ package color
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/mattn/go-isatty"
 )
@@ -29,26 +30,73 @@ func EnableColor(cache bool) (result bool) {
 }
 
 func New(enable bool) ColorFn {
-	return func(s string) (string, string, string, bool) { return "", "", s, enable }
+	return func(s string) (open []string, clase []string, out string, color bool) {
+		return []string{}, []string{}, s, enable
+	}
 }
 
 var Std = New(EnableColor(false))
 
-type ColorFn func(s string) (string, string, string, bool)
+type ColorFn func(s string) (open []string, clase []string, out string, enableColor bool)
 
 func (f ColorFn) color(start, end string) ColorFn {
-	return func(s string) (string, string, string, bool) {
+	return func(s string) (open []string, clase []string, out string, color bool) {
 		a, b, c, e := f(s)
-		return fmt.Sprintf("%s\u001b[%sm", a, start), fmt.Sprintf("%s\u001b[%sm", b, end), c, e
+		a = append(a, start)
+		b = append(b, end)
+		return a, b, c, e
 	}
 }
 
 func (f ColorFn) String(s string) string {
-	start, end, v, enable := f(s)
+	open, close, v, enable := f(s)
 	if !enable {
 		return v
 	}
-	return start + v + end
+
+	strs := make([]string, len(open)+len(close)+1)
+	l := len(strs)
+	vi := l / 2
+	strs[vi] = v
+	for i := range open {
+		strs[i] = fmt.Sprintf("\x1b[%sm", open[i])
+		strs[l-i-1] = fmt.Sprintf("\x1b[%sm", close[i])
+	}
+
+	// support nested color
+	for i := len(open) - 1; i >= 0; i-- {
+		if strings.Contains(v, "\x1b") {
+			strs[vi] = stringReplaceAll(strs[vi], strs[l-i-1], strs[i])
+		}
+	}
+	return strings.Join(strs, "")
+}
+
+func stringReplaceAll(str, substring, replacer string) string {
+	if !strings.Contains(str, substring) {
+		return str
+	}
+
+	var result strings.Builder
+	subLen := len(substring)
+	start := 0
+
+	for {
+		index := strings.Index(str[start:], substring)
+		if index == -1 {
+			break
+		}
+
+		index += start
+		result.WriteString(str[start:index])
+		result.WriteString(substring)
+		result.WriteString(replacer)
+
+		start = index + subLen
+	}
+
+	result.WriteString(str[start:])
+	return result.String()
 }
 
 func (c ColorFn) Black() ColorFn {
