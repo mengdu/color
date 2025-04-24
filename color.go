@@ -2,31 +2,34 @@ package color
 
 import (
 	"fmt"
-	"os"
 	"strings"
-
-	"github.com/mattn/go-isatty"
 )
 
-var enable int = -1
-
-func EnableColor(cache bool) (result bool) {
-	if cache {
-		if enable != -1 {
-			return enable == 1
-		}
-		defer func() {
-			if result {
-				enable = 1
-			} else {
-				enable = 0
-			}
-		}()
+func stringReplaceAll(str, substring, replacer string) string {
+	if !strings.Contains(str, substring) {
+		return str
 	}
-	envVal := os.Getenv("FORCE_COLOR")
-	envForceColor := envVal != "" && envVal != "0"
-	fd := os.Stdout.Fd()
-	return envForceColor || (isatty.IsTerminal(fd) || isatty.IsCygwinTerminal(fd))
+
+	var result strings.Builder
+	subLen := len(substring)
+	start := 0
+
+	for {
+		index := strings.Index(str[start:], substring)
+		if index == -1 {
+			break
+		}
+
+		index += start
+		result.WriteString(str[start:index])
+		result.WriteString(substring)
+		result.WriteString(replacer)
+
+		start = index + subLen
+	}
+
+	result.WriteString(str[start:])
+	return result.String()
 }
 
 func New(enable bool) ColorFn {
@@ -34,8 +37,6 @@ func New(enable bool) ColorFn {
 		return []string{}, []string{}, s, enable
 	}
 }
-
-var Std = New(EnableColor(false))
 
 type ColorFn func(s string) (open []string, clase []string, out string, enableColor bool)
 
@@ -70,33 +71,6 @@ func (f ColorFn) String(s string) string {
 		}
 	}
 	return strings.Join(strs, "")
-}
-
-func stringReplaceAll(str, substring, replacer string) string {
-	if !strings.Contains(str, substring) {
-		return str
-	}
-
-	var result strings.Builder
-	subLen := len(substring)
-	start := 0
-
-	for {
-		index := strings.Index(str[start:], substring)
-		if index == -1 {
-			break
-		}
-
-		index += start
-		result.WriteString(str[start:index])
-		result.WriteString(substring)
-		result.WriteString(replacer)
-
-		start = index + subLen
-	}
-
-	result.WriteString(str[start:])
-	return result.String()
 }
 
 func (c ColorFn) Black() ColorFn {

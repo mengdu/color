@@ -11,7 +11,7 @@ func cell(s string) string {
 }
 
 func main() {
-	fmt.Printf("%s%s\n", color.Std.BgGray().String(" Github "), color.Std.BgGreen().White().String(" github.com/mengdu/color "))
+	fmt.Printf("%s%s\n", color.BgGray().String(" Github "), color.BgGreen().White().String(" github.com/mengdu/color "))
 	// c := color.New(false)
 	c := color.New(color.EnableColor(true))
 	fmt.Printf("%s %s %s %s\n", c.Black().String(cell("Black")), c.Gray().String(cell("Gray")), c.BgBlack().String(cell("BgBlack")), c.BgGray().String(cell("BgGray")))
@@ -38,6 +38,5 @@ func main() {
 	)))
 	fmt.Println(c.StrikeThrough().Underline().Bold().Italic().Red().String("StrikeThrough Underline Bold Italic Red"))
 	fmt.Println(c.Other("38;2;117;45;245", "0").String("Other color"))
-	fmt.Println(c.Other("48;2;117;45;245", "0").String("Other color"))
-
+	fmt.Println(c.Other("48;2;117;45;245", "0").String("Other bg color"))
 }
