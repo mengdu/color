@@ -2,11 +2,12 @@ package color
 
 import (
 	"os"
+	"strconv"
 
 	"github.com/mattn/go-isatty"
 )
 
-var enable int = -1
+var enable int = -1 // -1: not initialized, 0: disabled, 1: enabled
 
 // EnableColor returns true if color is enabled
 func EnableColor(fromCache bool) (result bool) {
@@ -22,8 +23,7 @@ func EnableColor(fromCache bool) (result bool) {
 			}
 		}()
 	}
-	envVal := os.Getenv("FORCE_COLOR")
-	envForceColor := envVal != "" && envVal != "0"
+	envForceColor, _ := strconv.ParseBool(os.Getenv("FORCE_COLOR"))
 	fd := os.Stdout.Fd()
 	return envForceColor || (isatty.IsTerminal(fd) || isatty.IsCygwinTerminal(fd))
 }
